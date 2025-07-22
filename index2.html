@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>매입송장 처리 - ERP RPA 대시보드</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+      background-color: #f9fcff;
+      padding: 40px;
+      color: #2c3e50;
+      transition: background-color 0.3s ease;
+      margin: 0;
+    }
+    .container {
+      max-width: 1440px;
+      margin: auto;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 24px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      transition: box-shadow 0.2s ease-in-out, transform 0.2s;
+    }
+    .section:hover {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+    .input-group {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    .input-group h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .form-row label {
+      min-width: 120px;
+      font-weight: bold;
+      color: #333;
+    }
+    .form-row input, .form-row select {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      min-width: 200px;
+    }
+    .form-row input:focus, .form-row select:focus {
+      border-color: #2980b9;
+      outline: none;
+      box-shadow: 0 0 5px rgba(41, 128, 185, 0.4);
+    }
+    .button-group {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .button-group button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    .btn-primary {
+      background-color: #2980b9;
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: #1c6692;
+    }
+    .btn-success {
+      background-color: #27ae60;
+      color: white;
+    }
+    .btn-success:hover {
+      background-color: #1e8449;
+    }
+    .btn-secondary {
+      background-color: #7f8c8d;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background-color: #5d6d6e;
+    }
+    .file-upload-area {
+      border: 2px dashed #bdc3c7;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      background-color: #f8f9fa;
+      margin: 20px 0;
+      transition: all 0.3s ease;
+    }
+    .file-upload-area:hover {
+      border-color: #2980b9;
+      background-color: #e3f2fd;
+    }
+    .file-upload-area.dragover {
+      border-color: #2980b9;
+      background-color: #e3f2fd;
+    }
+    .upload-icon {
+      font-size: 48px;
+      color: #7f8c8d;
+      margin-bottom: 15px;
+    }
+    .upload-text {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    .upload-hint {
+      font-size: 14px;
+      color: #999;
+    }
+    .file-list {
+      margin-top: 20px;
+    }
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: white;
+    }
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .file-icon {
+      font-size: 20px;
+    }
+    .file-name {
+      font-weight: 500;
+    }
+    .file-size {
+      color: #666;
+      font-size: 12px;
+    }
+    .file-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .file-actions button {
+      padding: 4px 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn-remove {
+      background-color: #e74c3c;
+      color: white;
+    }
+    .btn-remove:hover {
+      background-color: #c0392b;
+    }
+    .status-indicator {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .status-pending {
+      background: #f39c12;
+      color: white;
+    }
+    .status-processing {
+      background: #3498db;
+      color: white;
+    }
+    .status-completed {
+      background: #27ae60;
+      color: white;
+    }
+    .status-error {
+      background: #e74c3c;
+      color: white;
+    }
+    .progress-section {
+      margin-top: 30px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #ecf0f1;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background-color: #2980b9;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* 사이드바 네비게이션 스타일 */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: #ffffff;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 999;
+      padding: 20px 0;
+      transition: all 0.3s ease;
+    }    .sidebar-header {
+      padding: 0 20px 30px;
+      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }    .sidebar-logo {
+      width: 99.45%;
+      aspect-ratio: 1;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      object-fit: cover;
+    }    .sidebar-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin: 0;
+    }
+
+    .sidebar-subtitle {
+      font-size: 11px;
+      color: #7f8c8d;
+      margin-top: 8px;
+      font-weight: 400;
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    .sidebar-nav {
+      padding: 0 10px;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 15px 20px;
+      margin-bottom: 5px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #666;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: #f0f5ff;
+      color: #2980b9;
+      text-decoration: none;
+    }
+
+    .nav-item.active {
+      background: #2980b9;
+      color: white;
+    }
+
+    .nav-item.active:hover {
+      background: #1c6692;
+    }
+
+    .nav-icon {
+      margin-right: 12px;
+      font-size: 16px;
+    }
+
+    /* 메인 컨텐츠 영역 조정 */
+    .main-content {
+      margin-left: 250px;
+      transition: margin-left 0.3s ease;
+    }    /* 스크린 캡처 버튼 스타일 */
+    .screen-capture-btn {
+      position: fixed;
+      top: 20px;
+      right: 80px; /* 다크모드 버튼 왼쪽에 위치 */
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen-capture-btn:hover {
+      background: #219a52;
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .screen-capture-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* 다크모드 토글 버튼 스타일 */
+    .dark-mode-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dark-mode-toggle:hover {
+      background: #1c6692;
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 다크모드 스타일 */
+    body.dark-mode {
+      background-color: #1a1a1a;
+      background-image: none;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .section {
+      background: #2d2d2d;
+      color: #e0e0e0;
+      border: 1px solid #404040;
+    }
+
+    body.dark-mode .input-group {
+      background-color: #3a3a3a;
+      border: 1px solid #555;
+    }
+
+    body.dark-mode .input-group h3,
+    body.dark-mode .form-row label,
+    body.dark-mode h2,
+    body.dark-mode h3 {
+      color: #e0e0e0 !important;
+    }
+
+    body.dark-mode .form-row input,
+    body.dark-mode .form-row select {
+      background: #404040;
+      color: #e0e0e0;
+      border: 1px solid #555;
+    }
+
+    body.dark-mode .form-row input:focus,
+    body.dark-mode .form-row select:focus {
+      border-color: #4a9eff;
+      box-shadow: 0 0 5px rgba(74, 158, 255, 0.4);
+    }
+
+    body.dark-mode .file-upload-area {
+      background-color: #404040;
+      border-color: #666;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .file-upload-area:hover {
+      border-color: #4a9eff;
+      background-color: #4a4a4a;
+    }
+
+    body.dark-mode .file-item {
+      background: #404040;
+      border-color: #555;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .upload-text {
+      color: #b0b0b0;
+    }
+
+    body.dark-mode .upload-hint {
+      color: #888;
+    }
+
+    body.dark-mode .progress-bar {
+      background-color: #404040;
+    }
+
+    body.dark-mode .progress-text {
+      color: #b0b0b0;
+    }
+
+    /* 사이드바 다크모드 스타일 */
+    body.dark-mode .sidebar {
+      background: #2d2d2d;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    body.dark-mode .sidebar-header {
+      border-bottom: 1px solid #404040;
+    }    body.dark-mode .sidebar-title {
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .sidebar-subtitle {
+      color: #95a5a6;
+    }
+
+    body.dark-mode .nav-item {
+      color: #b0b0b0;
+    }
+
+    body.dark-mode .nav-item:hover {
+      background: #404040;
+      color: #4a9eff;
+    }
+
+    body.dark-mode .nav-item.active {
+      background: #4a9eff;
+      color: white;
+    }
+
+    body.dark-mode .nav-item.active:hover {
+      background: #357abd;
+    }    body.dark-mode .dark-mode-toggle {
+      background: #f39c12;
+    }
+
+    body.dark-mode .dark-mode-toggle:hover {
+      background: #e67e22;
+    }
+
+    /* 다크모드에서 스크린 캡처 버튼 스타일 */
+    body.dark-mode .screen-capture-btn {
+      background: #e67e22;
+    }
+
+    body.dark-mode .screen-capture-btn:hover {
+      background: #d35400;
+    }
+
+    /* 플레이스홀더 텍스트 다크모드 */
+    body.dark-mode input::placeholder {
+      color: #999 !important;
+    }
+
+    body.dark-mode input::-webkit-input-placeholder {
+      color: #999 !important;
+    }
+
+    body.dark-mode input::-moz-placeholder {
+      color: #999 !important;
+    }    body.dark-mode input:-ms-input-placeholder {
+      color: #999 !important;
+    }
+
+    /* 섹션 헤더 레이아웃 스타일 */
+    .section-header-with-button {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .section-header-content {
+      flex: 1;
+    }
+
+    .section-header-actions {
+      flex-shrink: 0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 5px;
+    }
+
+    /* RPA 실행 버튼 스타일 */
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .process-btn {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: white;
+    }
+
+    .process-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #229954, #27ae60);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .process-btn:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .btn-icon {
+      font-size: 12px;
+    }
+
+    /* 다크 모드용 RPA 실행 버튼 스타일 */
+    body.dark-mode .process-btn {
+      background: linear-gradient(135deg, #1e7e34, #28a745);
+    }
+
+    body.dark-mode .process-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #155724, #1e7e34);
+    }
+
+    body.dark-mode .process-btn:disabled {
+      background: #495057;
+    }
+  </style>
+</head>
+<body>
+  <!-- 로그인 모듈 스크립트 로드 -->
+  <script src="login-module.js"></script>  <!-- 사이드바 네비게이션 -->  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="ERP_RPA아이콘.png" alt="ERP RPA" class="sidebar-logo">
+    <div class="sidebar-title">ERP RPA SYSTEM - Ark</div>
+    <div class="sidebar-subtitle" style="font-size:12px; font-weight:400; margin-top:4px;">
+      <span style="color:#2980b9; font-weight:600;">HyperAutomation</span> <span style="opacity:0.7;">| Rev. 2025.06.28</span>
+    </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html" class="nav-item" id="nav-voucher">
+        <span class="nav-icon">📋</span>
+        1. 회계 전표 상신
+      </a>
+      <a href="index2.html" class="nav-item active" id="nav-invoice">
+        <span class="nav-icon">📄</span>
+        2. 매입송장 상신
+      </a>    </nav>
+  </div>
+
+  <!-- 메인 컨텐츠 -->
+  <div class="main-content">
+    <!-- 스크린 캡처 버튼 -->
+    <button class="screen-capture-btn" onclick="captureFullPage()" title="전체 페이지 스크린샷">
+      <span id="captureIcon">📷</span>
+    </button>
+    
+    <!-- 다크모드 토글 버튼 -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="다크모드 전환">
+      <span id="darkModeIcon">🌙</span>
+    </button>
+    
+    <div class="container"><!-- 페이지 헤더 -->
+      <div class="section">
+        <h2>📄 매입송장 처리</h2>
+        <p>매입송장 파일을 업로드하고 자동 처리를 진행합니다.</p>        <div style="margin-top: 20px;">
+          <!-- RPA 실행 버튼 -->          <button onclick="executeRPA()" class="action-btn process-btn">
+            <span class="btn-icon">🚀</span> RPA 실행
+          </button>
+        </div>
+      </div>
+
+      <!-- 파일 업로드 섹션 -->
+      <div class="section">
+        <h3>📁 파일 업로드</h3>
+        <div class="input-group">
+          <h3>업로드 설정</h3>
+          <div class="form-row">
+            <label for="fileType">파일 형식:</label>
+            <select id="fileType">
+              <option value="pdf">PDF 파일</option>
+              <option value="excel">Excel 파일</option>
+              <option value="image">이미지 파일</option>
+              <option value="all">모든 파일</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="processingMode">처리 모드:</label>
+            <select id="processingMode">
+              <option value="auto">자동 처리</option>
+              <option value="manual">수동 검토</option>
+              <option value="batch">일괄 처리</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="file-upload-area" id="uploadArea">
+          <div class="upload-icon">📤</div>
+          <div class="upload-text">파일을 드래그하여 놓거나 클릭하여 선택하세요</div>
+          <div class="upload-hint">PDF, Excel, 이미지 파일을 지원합니다</div>
+          <input type="file" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png" style="display: none;">
+        </div>
+
+        <div class="file-list" id="fileList">
+          <!-- 업로드된 파일 목록이 여기에 표시됩니다 -->
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="selectFiles()">📁 파일 선택</button>
+          <button class="btn-success" onclick="uploadFiles()" id="uploadBtn" disabled>⬆️ 업로드 시작</button>
+          <button class="btn-secondary" onclick="clearFiles()">🗑️ 목록 지우기</button>
+        </div>
+      </div>
+
+      <!-- 처리 진행 상황 -->
+      <div class="section">
+        <h3>⚙️ 처리 진행 상황</h3>
+        <div class="progress-section">
+          <div>처리 진행률</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-text" id="progressText">대기 중...</div>
+        </div>
+      </div>
+
+      <!-- 처리 옵션 -->
+      <div class="section">
+        <h3>⚙️ 처리 옵션</h3>
+        <div class="input-group">
+          <h3>자동 처리 설정</h3>
+          <div class="form-row">
+            <label for="extractData">데이터 추출:</label>
+            <select id="extractData">
+              <option value="all">모든 정보</option>
+              <option value="essential">필수 정보만</option>
+              <option value="custom">사용자 정의</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="validation">유효성 검사:</label>
+            <select id="validation">
+              <option value="strict">엄격함</option>
+              <option value="normal">보통</option>
+              <option value="relaxed">관대함</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="outputFormat">출력 형식:</label>
+            <select id="outputFormat">
+              <option value="excel">Excel 파일</option>
+              <option value="csv">CSV 파일</option>
+              <option value="json">JSON 파일</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="startProcessing()">🚀 처리 시작</button>
+          <button class="btn-secondary" onclick="pauseProcessing()">⏸️ 일시 정지</button>
+          <button class="btn-secondary" onclick="stopProcessing()">⏹️ 중지</button>
+        </div>
+      </div>
+
+      <!-- 결과 확인 -->
+      <div class="section">
+        <h3>📊 처리 결과</h3>
+        <div class="input-group">
+          <h3>처리 통계</h3>
+          <div class="form-row">
+            <label>총 파일 수:</label>
+            <span id="totalFiles">0</span>
+          </div>
+          <div class="form-row">
+            <label>처리 완료:</label>
+            <span id="completedFiles">0</span>
+          </div>
+          <div class="form-row">
+            <label>처리 실패:</label>
+            <span id="failedFiles">0</span>
+          </div>
+          <div class="form-row">
+            <label>성공률:</label>
+            <span id="successRate">0%</span>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-success" onclick="downloadResults()">📥 결과 다운로드</button>
+          <button class="btn-primary" onclick="viewResults()">👁️ 결과 보기</button>
+          <button class="btn-secondary" onclick="exportReport()">📄 보고서 내보내기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 파일 관리
+    let uploadedFiles = [];    // 전체 페이지 스크린 캡처 함수
+    async function captureFullPage() {
+      const captureBtn = document.querySelector('.screen-capture-btn');
+      const captureIcon = document.getElementById('captureIcon');
+      
+      // 버튼 상태 변경
+      const originalIcon = captureIcon.textContent;
+      captureIcon.textContent = '⏳';
+      captureBtn.disabled = true;
+      captureBtn.style.opacity = '0.7';
+      
+      try {
+        console.log('전체 페이지 스크린 캡처 시작');
+        
+        if (window.electronAPI && window.electronAPI.captureFullPage) {
+          // Electron 환경에서 실행
+          const result = await window.electronAPI.captureFullPage();
+          
+          if (result.success) {
+            // 성공 시 잠깐 체크 아이콘 표시
+            captureIcon.textContent = '✅';
+            
+            // 상세한 성공 메시지 표시
+            const message = result.message || '전체 페이지 스크린샷이 저장되었습니다!';
+            const dimensions = result.dimensions;
+            let detailMsg = `${message}\n\n경로: ${result.path}`;
+            
+            if (dimensions) {
+              detailMsg += `\n크기: ${dimensions.width}x${dimensions.height}px`;
+              if (dimensions.steps) {
+                detailMsg += `\n캡처 단계: ${dimensions.steps}단계`;
+              }
+              if (dimensions.scalingFactor) {
+                detailMsg += `\n스케일링: ${dimensions.scalingFactor.toFixed(2)}x`;
+              }
+            }
+            
+            alert(detailMsg);
+            
+            setTimeout(() => {
+              captureIcon.textContent = originalIcon;
+            }, 2000);
+          } else {
+            captureIcon.textContent = '❌';
+            alert('스크린샷 저장 실패: ' + (result.error || '알 수 없는 오류'));
+            setTimeout(() => {
+              captureIcon.textContent = originalIcon;
+            }, 2000);
+          }
+        } else if (window.electron && window.electron.ipcRenderer) {
+          // 호환성을 위한 fallback
+          const result = await window.electron.ipcRenderer.invoke('capture-full-page');
+          
+          if (result.success) {
+            captureIcon.textContent = '✅';
+            const message = result.message || '전체 페이지 스크린샷이 저장되었습니다!';
+            alert(`${message}\n경로: ${result.path}`);
+            setTimeout(() => {
+              captureIcon.textContent = originalIcon;
+            }, 2000);
+          } else {
+            captureIcon.textContent = '❌';
+            alert('스크린샷 저장 실패: ' + (result.error || '알 수 없는 오류'));
+            setTimeout(() => {
+              captureIcon.textContent = originalIcon;
+            }, 2000);
+          }
+        } else {
+          // 브라우저 환경에서는 html2canvas 사용
+          await captureWithHtml2Canvas();
+        }
+        
+      } catch (error) {
+        console.error('스크린 캡처 오류:', error);
+        captureIcon.textContent = '❌';
+        alert('스크린 캡처 중 오류 발생: ' + error.message);
+        setTimeout(() => {
+          captureIcon.textContent = originalIcon;
+        }, 2000);
+      } finally {
+        // 버튼 상태 복원
+        captureBtn.disabled = false;
+        captureBtn.style.opacity = '1';
+      }
+    }// 브라우저 환경에서 html2canvas를 사용한 전체 페이지 캡처
+    async function captureWithHtml2Canvas() {
+      try {
+        // html2canvas 라이브러리가 로드되어 있는지 확인
+        if (typeof html2canvas === 'undefined') {
+          // html2canvas 동적 로드
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+          document.head.appendChild(script);
+          
+          await new Promise((resolve, reject) => {
+            script.onload = resolve;
+            script.onerror = reject;
+          });
+        }
+        
+        // 현재 스크롤 위치 저장
+        const originalScrollX = window.scrollX;
+        const originalScrollY = window.scrollY;
+        
+        // 페이지를 맨 위로 스크롤
+        window.scrollTo(0, 0);
+        
+        // 전체 페이지 캡처 (스크롤 영역 포함)
+        const canvas = await html2canvas(document.body, {
+          height: document.body.scrollHeight,
+          width: document.body.scrollWidth,
+          useCORS: true,
+          scale: 1,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: document.body.scrollWidth,
+          windowHeight: document.body.scrollHeight
+        });
+        
+        // 원래 스크롤 위치로 복원
+        window.scrollTo(originalScrollX, originalScrollY);
+        
+        // 파일명 생성
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+        const fileName = `screenshot_${timestamp}.png`;
+        
+        // 이미지 다운로드
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // 성공 메시지
+        const captureIcon = document.getElementById('captureIcon');
+        captureIcon.textContent = '✅';
+        setTimeout(() => {
+          captureIcon.textContent = '📷';
+        }, 1500);
+        
+        alert(`전체 페이지 스크린샷이 다운로드되었습니다!\n파일명: ${fileName}\n크기: ${canvas.width}x${canvas.height}px`);
+        
+      } catch (error) {
+        throw new Error('브라우저 전체 페이지 캡처 실패: ' + error.message);
+      }
+    }
+
+    // 다크모드 토글 함수
+    function toggleDarkMode() {
+      const body = document.body;
+      const darkModeIcon = document.getElementById('darkModeIcon');
+      
+      body.classList.toggle('dark-mode');
+      
+      // 아이콘 변경
+      if (body.classList.contains('dark-mode')) {
+        darkModeIcon.textContent = '☀️';
+        localStorage.setItem('darkMode', 'enabled');
+      } else {
+        darkModeIcon.textContent = '🌙';
+        localStorage.setItem('darkMode', 'disabled');
+      }
+    }
+
+    // 페이지 로드 시 다크모드 설정 복원
+    function initializeDarkMode() {
+      const darkMode = localStorage.getItem('darkMode');
+      const body = document.body;
+      const darkModeIcon = document.getElementById('darkModeIcon');
+      
+      if (darkMode === 'enabled') {
+        body.classList.add('dark-mode');
+        darkModeIcon.textContent = '☀️';
+      } else {
+        darkModeIcon.textContent = '🌙';
+      }
+    }
+
+    // 파일 선택
+    function selectFiles() {
+      document.getElementById('fileInput').click();
+    }
+
+    // 파일 업로드 영역 이벤트
+    function setupFileUpload() {
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+
+      // 드래그 앤 드롭 이벤트
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+      });
+
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files);
+        addFiles(files);
+      });
+
+      // 클릭으로 파일 선택
+      uploadArea.addEventListener('click', () => {
+        fileInput.click();
+      });
+
+      // 파일 입력 변경
+      fileInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        addFiles(files);
+      });
+    }
+
+    // 파일 추가
+    function addFiles(files) {
+      files.forEach(file => {
+        if (!uploadedFiles.find(f => f.name === file.name)) {
+          uploadedFiles.push({
+            file: file,
+            name: file.name,
+            size: file.size,
+            status: 'pending'
+          });
+        }
+      });
+      updateFileList();
+      updateUploadButton();
+    }
+
+    // 파일 목록 업데이트
+    function updateFileList() {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+
+      uploadedFiles.forEach((fileItem, index) => {
+        const fileDiv = document.createElement('div');
+        fileDiv.className = 'file-item';
+        fileDiv.innerHTML = `
+          <div class="file-info">
+            <span class="file-icon">📄</span>
+            <div>
+              <div class="file-name">${fileItem.name}</div>
+              <div class="file-size">${formatFileSize(fileItem.size)}</div>
+            </div>
+          </div>
+          <div class="file-actions">
+            <span class="status-indicator status-${fileItem.status}">${getStatusText(fileItem.status)}</span>
+            <button class="btn-remove" onclick="removeFile(${index})">삭제</button>
+          </div>
+        `;
+        fileList.appendChild(fileDiv);
+      });
+    }
+
+    // 파일 제거
+    function removeFile(index) {
+      uploadedFiles.splice(index, 1);
+      updateFileList();
+      updateUploadButton();
+    }
+
+    // 모든 파일 지우기
+    function clearFiles() {
+      uploadedFiles = [];
+      updateFileList();
+      updateUploadButton();
+    }
+
+    // 업로드 버튼 상태 업데이트
+    function updateUploadButton() {
+      const uploadBtn = document.getElementById('uploadBtn');
+      uploadBtn.disabled = uploadedFiles.length === 0;
+    }
+
+    // 파일 크기 포맷
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // 상태 텍스트 반환
+    function getStatusText(status) {
+      const statusMap = {
+        'pending': '대기',
+        'processing': '처리중',
+        'completed': '완료',
+        'error': '오류'
+      };
+      return statusMap[status] || '알 수 없음';
+    }    // 파일 업로드 시작
+    function uploadFiles() {
+      // 로그인 상태 확인
+      if (!isLoggedIn()) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
+      if (uploadedFiles.length === 0) return;
+
+      uploadedFiles.forEach(fileItem => {
+        fileItem.status = 'processing';
+      });
+      updateFileList();
+
+      // 시뮬레이션된 업로드 프로세스
+      setTimeout(() => {
+        uploadedFiles.forEach(fileItem => {
+          fileItem.status = Math.random() > 0.2 ? 'completed' : 'error';
+        });
+        updateFileList();
+        updateStatistics();
+      }, 3000);
+    }    // 처리 시작
+    function startProcessing() {
+      // 로그인 상태 확인
+      if (!isLoggedIn()) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      
+      progressText.textContent = '처리 중...';
+      
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          progressText.textContent = '처리 완료';
+        }
+        progressFill.style.width = progress + '%';
+      }, 500);
+    }
+
+    // 처리 일시 정지
+    function pauseProcessing() {
+      const progressText = document.getElementById('progressText');
+      progressText.textContent = '일시 정지됨';
+    }
+
+    // 처리 중지
+    function stopProcessing() {
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      progressFill.style.width = '0%';
+      progressText.textContent = '중지됨';
+    }
+
+    // 통계 업데이트
+    function updateStatistics() {
+      const total = uploadedFiles.length;
+      const completed = uploadedFiles.filter(f => f.status === 'completed').length;
+      const failed = uploadedFiles.filter(f => f.status === 'error').length;
+      const successRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      document.getElementById('totalFiles').textContent = total;
+      document.getElementById('completedFiles').textContent = completed;
+      document.getElementById('failedFiles').textContent = failed;
+      document.getElementById('successRate').textContent = successRate + '%';
+    }    // 결과 다운로드
+    function downloadResults() {
+      // 로그인 상태 확인
+      if (!isLoggedIn()) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+      alert('결과 파일을 다운로드합니다.');
+    }
+
+    // 결과 보기
+    function viewResults() {
+      // 로그인 상태 확인
+      if (!isLoggedIn()) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+      alert('처리 결과를 확인합니다.');
+    }
+
+    // 보고서 내보내기
+    function exportReport() {
+      // 로그인 상태 확인
+      if (!isLoggedIn()) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+      alert('처리 보고서를 내보냅니다.');
+    }    // 버튼 상태 업데이트 함수 (로그인 상태에 따라)
+    function updateButtonStates() {
+      const buttons = document.querySelectorAll('.btn-primary, .btn-success, .btn-secondary, .process-btn');
+      const isUserLoggedIn = isLoggedIn();
+      
+      console.log('updateButtonStates 호출됨. 로그인 상태:', isUserLoggedIn);
+      
+      // 진행 버튼 특별 처리
+      const processInvoiceBtn = document.getElementById('processInvoiceBtn');
+      if (processInvoiceBtn) {
+        console.log('processInvoiceBtn 상태 업데이트:', isUserLoggedIn);
+        processInvoiceBtn.disabled = !isUserLoggedIn;
+        if (!isUserLoggedIn) {
+          processInvoiceBtn.style.opacity = '0.5';
+          processInvoiceBtn.title = '로그인이 필요합니다';
+        } else {
+          processInvoiceBtn.style.opacity = '1';
+          processInvoiceBtn.title = '';
+        }
+      }
+      
+      // 다른 버튼들 처리
+      buttons.forEach(button => {
+        if (button.id !== 'processInvoiceBtn') { // 이미 처리된 버튼 제외
+          const shouldUpdate = (
+            (button.onclick && (
+              button.onclick.toString().includes('uploadFiles') ||
+              button.onclick.toString().includes('startProcessing') ||
+              button.onclick.toString().includes('downloadResults') ||
+              button.onclick.toString().includes('viewResults') ||
+              button.onclick.toString().includes('exportReport')
+            ))
+          );
+          
+          if (shouldUpdate) {
+            console.log('버튼 업데이트:', button.id || button.className, '로그인 상태:', isUserLoggedIn);
+            button.disabled = !isUserLoggedIn;
+            if (!isUserLoggedIn) {
+              button.style.opacity = '0.5';
+              button.title = '로그인이 필요합니다';
+            } else {
+              button.style.opacity = '1';
+              button.title = '';
+            }
+          }
+        }
+      });    }    // RPA 실행 함수
+    async function executeRPA() {
+      console.log('=== RPA 실행 시작 ===');
+      console.log('executeRPA 함수가 호출되었습니다!');
+      
+      // 로그인 상태 확인 (여러 방법으로 시도)
+      let loginStatus = false;
+      
+      if (typeof window.isLoggedIn === 'function') {
+        loginStatus = window.isLoggedIn();
+        console.log('window.isLoggedIn():', loginStatus);
+      } else if (typeof isLoggedIn === 'function') {
+        loginStatus = isLoggedIn();
+        console.log('isLoggedIn():', loginStatus);
+      } else {
+        console.error('isLoggedIn 함수를 찾을 수 없습니다!');
+        alert('로그인 시스템 오류: 로그인 함수를 찾을 수 없습니다.\n페이지를 새로고침해주세요.');
+        return;
+      }
+      
+      if (!loginStatus) {
+        console.log('로그인되지 않음 - 로그인 오버레이 표시');
+        
+        if (typeof showNotification === 'function') {
+          showNotification('먼저 로그인을 해주세요.', 'warning');
+        } else {
+          alert('먼저 로그인을 해주세요.');
+        }
+        
+        if (typeof showLoginOverlay === 'function') {
+          showLoginOverlay();
+        } else if (typeof window.showLoginOverlay === 'function') {
+          window.showLoginOverlay();
+        } else {
+          console.warn('showLoginOverlay 함수를 찾을 수 없습니다.');
+        }
+        return;
+      }
+
+      // RPA 실행 버튼 찾기
+      const rpaBtn = document.querySelector('button[onclick="executeRPA()"]');
+      const originalHTML = rpaBtn ? rpaBtn.innerHTML : '';
+      
+      try {
+        // 버튼 상태 변경
+        if (rpaBtn) {
+          console.log('버튼 상태 변경 중...');
+          rpaBtn.disabled = true;
+          rpaBtn.innerHTML = '<span class="btn-icon">⏳</span> 처리 중...';
+        }
+        
+        console.log('매입송장 RPA 처리 시작...');
+        
+        if (typeof showNotification === 'function') {
+          showNotification('매입송장 RPA 처리를 시작합니다...', 'info');
+        } else {
+          alert('매입송장 RPA 처리를 시작합니다...');
+        }
+        
+        // API 확인 및 호출
+        console.log('window.electronAPI 확인:', !!window.electronAPI);
+        console.log('processInvoice API 확인:', !!window.electronAPI?.processInvoice);
+        
+        if (window.electronAPI && window.electronAPI.processInvoice) {
+          console.log('Electron API 호출 중...');
+          const result = await window.electronAPI.processInvoice();
+          console.log('RPA 처리 결과:', result);
+          
+          if (result.success) {
+            const message = result.message || 'RPA 처리가 완료되었습니다.';
+            if (typeof showNotification === 'function') {
+              showNotification(message, 'success');
+            } else {
+              alert('성공: ' + message);
+            }
+          } else {
+            const error = result.error || 'RPA 처리 중 오류가 발생했습니다.';
+            if (typeof showNotification === 'function') {
+              showNotification(error, 'error');
+            } else {
+              alert('오류: ' + error);
+            }
+          }
+        } else {
+          const errorMsg = 'Electron API가 연결되지 않았습니다.';
+          console.error(errorMsg);
+          if (typeof showNotification === 'function') {
+            showNotification(errorMsg, 'error');
+          } else {
+            alert('오류: ' + errorMsg);
+          }
+        }
+        
+      } catch (error) {
+        console.error('RPA 실행 오류:', error);
+        const errorMsg = 'RPA 실행 중 오류가 발생했습니다: ' + error.message;
+        if (typeof showNotification === 'function') {
+          showNotification(errorMsg, 'error');
+        } else {
+          alert(errorMsg);
+        }
+      } finally {
+        // 버튼 상태 복원
+        console.log('버튼 상태 복원 중...');
+        if (rpaBtn) {
+          rpaBtn.disabled = false;
+          rpaBtn.innerHTML = originalHTML || '<span class="btn-icon">🚀</span> RPA 실행';
+        }
+      }
+    }      // 페이지 로드 완료 시 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('=== DOMContentLoaded 이벤트 발생 ===');
+      console.log('사용 가능한 함수들 확인:');
+      console.log('- window.isLoggedIn:', typeof window.isLoggedIn);
+      console.log('- isLoggedIn:', typeof isLoggedIn);
+      console.log('- showNotification:', typeof showNotification);
+      console.log('- showLoginOverlay:', typeof showLoginOverlay);
+      console.log('- window.electronAPI:', !!window.electronAPI);
+      console.log('- window.electronAPI.processInvoice:', !!window.electronAPI?.processInvoice);
+      console.log('DOMContentLoaded 이벤트 발생');
+      
+      // 로그인 시스템 초기화
+      initializeLoginSystem();
+      
+      initializeDarkMode();
+      setupFileUpload();
+      updateStatistics();
+        // 버튼 상태 초기화      updateButtonStates();
+    });
+
+    // 전역에서 접근 가능하도록 window 객체에 할당
+    window.captureFullPage = captureFullPage;
+    window.toggleDarkMode = toggleDarkMode;
+  </script>
+</body>
+</html>
